@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, Activity, BarChart3, Info, AlertTriangle, LogOut, ShieldCheck, User, FlaskConical, Stethoscope } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { API_BASE_URL } from './lib/api';
 import LoginPage from './components/LoginPage';
 import DoctorDashboard from './components/DoctorDashboard';
 import PatientDashboard from './components/PatientDashboard';
@@ -17,17 +18,17 @@ function MainApp() {
 
   useEffect(() => {
     // Check backend health and load public metadata
-    fetch('http://localhost:8000/api/health')
+    fetch(`${API_BASE_URL}/api/health`)
       .then(res => res.json())
       .then(data => setBackendStatus(data))
       .catch(err => setBackendStatus({ status: 'error', error: String(err) }));
       
-    fetch('http://localhost:8000/api/model/metrics')
+    fetch(`${API_BASE_URL}/api/model/metrics`)
       .then(res => res.json())
       .then(data => setMetrics(data))
       .catch(console.error);
       
-    fetch('http://localhost:8000/api/features/schema')
+    fetch(`${API_BASE_URL}/api/features/schema`)
       .then(res => res.json())
       .then(data => setSchema(data))
       .catch(console.error);

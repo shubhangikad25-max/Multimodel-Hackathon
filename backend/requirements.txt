@@ -9,3 +9,6 @@ joblib
 openpyxl
 pydantic
 python-multipart
+bcrypt
+pyjwt
+httpx

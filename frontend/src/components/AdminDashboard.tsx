@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Users, Activity, Database, Server, UserPlus, Lock, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../lib/api';
 
 export default function AdminDashboard() {
   const { authFetch, user: currentAdmin } = useAuth();
@@ -29,9 +30,9 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [uRes, logRes, statRes] = await Promise.all([
-        authFetch('http://localhost:8000/api/admin/users'),
-        authFetch('http://localhost:8000/api/admin/audit-logs'),
-        authFetch('http://localhost:8000/api/admin/system-status')
+        authFetch(`${API_BASE_URL}/api/admin/users`),
+        authFetch(`${API_BASE_URL}/api/admin/audit-logs`),
+        authFetch(`${API_BASE_URL}/api/admin/system-status`)
       ]);
 
       if (uRes.ok) setUsers(await uRes.json());
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
 
   const handleUpdateRole = async (userId: string, targetRole: string) => {
     try {
-      const res = await authFetch(`http://localhost:8000/api/admin/users/${userId}/role`, {
+      const res = await authFetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: targetRole })
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
 
   const handleToggleActive = async (userId: string, currentStatus: boolean) => {
     try {
-      const res = await authFetch(`http://localhost:8000/api/admin/users/${userId}/role`, {
+      const res = await authFetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: '', is_active: !currentStatus })
@@ -79,7 +80,7 @@ export default function AdminDashboard() {
     setCreatingUser(true);
     setCreateUserMsg(null);
     try {
-      const res = await authFetch('http://localhost:8000/api/admin/users', {
+      const res = await authFetch(`${API_BASE_URL}/api/admin/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

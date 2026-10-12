@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FlaskConical, Beaker, AlertTriangle, CheckCircle2, Send, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../lib/api';
 
 interface LabFieldConfig {
   key: string;
@@ -48,7 +49,7 @@ export default function LabTechDashboard() {
 
   const fetchSubmissions = async () => {
     try {
-      const res = await authFetch('http://localhost:8000/api/lab/submissions');
+      const res = await authFetch(`${API_BASE_URL}/api/lab/submissions`);
       if (res.ok) {
         const data = await res.json();
         setSubmissions(data);
@@ -69,7 +70,7 @@ export default function LabTechDashboard() {
     setSuccessMessage(null);
 
     try {
-      const res = await authFetch('http://localhost:8000/api/lab/submit', {
+      const res = await authFetch(`${API_BASE_URL}/api/lab/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

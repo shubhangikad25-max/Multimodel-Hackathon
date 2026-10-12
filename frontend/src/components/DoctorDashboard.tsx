@@ -3,6 +3,7 @@ import { Activity, Heart, Clock, FileCheck, CheckCircle2, AlertCircle, PlayCircl
 import PatientForm, { DEMO_PATIENT } from './PatientForm';
 import HeartModel from './HeartModel';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../lib/api';
 
 interface DoctorDashboardProps {
   metrics?: any;
@@ -27,7 +28,7 @@ export default function DoctorDashboard({ metrics: _metrics, schema }: DoctorDas
 
   const fetchHistory = async () => {
     try {
-      const res = await authFetch('http://localhost:8000/api/doctor/history');
+      const res = await authFetch(`${API_BASE_URL}/api/doctor/history`);
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
@@ -39,7 +40,7 @@ export default function DoctorDashboard({ metrics: _metrics, schema }: DoctorDas
 
   const fetchLabQueue = async () => {
     try {
-      const res = await authFetch('http://localhost:8000/api/lab/submissions');
+      const res = await authFetch(`${API_BASE_URL}/api/lab/submissions`);
       if (res.ok) {
         const data = await res.json();
         setLabSubmissions(data);
@@ -52,7 +53,7 @@ export default function DoctorDashboard({ metrics: _metrics, schema }: DoctorDas
   const handlePredict = async (formData: any, patientName: string = 'Clinical Assessment') => {
     setIsPredicting(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/predict', {
+      const res = await authFetch(`${API_BASE_URL}/api/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ features: formData, patient_name: patientName })
@@ -78,7 +79,7 @@ export default function DoctorDashboard({ metrics: _metrics, schema }: DoctorDas
 
   const fetchExplain = async (features: any) => {
     try {
-      const res = await authFetch('http://localhost:8000/api/explain', {
+      const res = await authFetch(`${API_BASE_URL}/api/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target: 'Cath', features })
@@ -95,7 +96,7 @@ export default function DoctorDashboard({ metrics: _metrics, schema }: DoctorDas
   const handleApproveLab = async (subId: string) => {
     setApprovingId(subId);
     try {
-      const res = await authFetch(`http://localhost:8000/api/lab/submissions/${subId}/approve`, {
+      const res = await authFetch(`${API_BASE_URL}/api/lab/submissions/${subId}/approve`, {
         method: 'POST'
       });
       if (res.ok) {

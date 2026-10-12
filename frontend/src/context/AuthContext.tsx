@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE_URL } from '../lib/api';
 
 export type UserRole = 'doctor' | 'patient' | 'lab_tech' | 'admin';
 
@@ -52,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        const res = await fetch('http://localhost:8000/api/auth/me', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -79,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     setError(null);
     try {
-      const res = await fetch('http://localhost:8000/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -99,7 +100,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       return true;
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check credentials.');
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        setError(`Unable to connect to CardioVision AI backend at ${API_BASE_URL}. Ensure the FastAPI server is running.`);
+      } else {
+        setError(err.message || 'Login failed. Please check credentials.');
+      }
       return false;
     }
   };
@@ -107,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     if (token) {
       // Fire-and-forget backend notification
-      fetch('http://localhost:8000/api/auth/logout', {
+      fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       }).catch(() => {});

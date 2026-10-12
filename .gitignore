@@ -29,6 +29,7 @@ ENV/
 Thumbs.db
 *.swp
 *.swo
+~$*
 
 # Environment variables & local secrets
 .env

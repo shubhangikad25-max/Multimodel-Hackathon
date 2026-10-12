@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Activity, CheckCircle2, ShieldCheck, Printer, Calendar, User, FileText, Stethoscope } from 'lucide-react';
 import HeartModel from './HeartModel';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../lib/api';
 
 export default function PatientDashboard() {
   const { authFetch } = useAuth();
@@ -17,7 +18,7 @@ export default function PatientDashboard() {
   const fetchMyRecord = async () => {
     setLoading(true);
     try {
-      const res = await authFetch('http://localhost:8000/api/patient/my-record');
+      const res = await authFetch(`${API_BASE_URL}/api/patient/my-record`);
       if (!res.ok) {
         throw new Error('Unable to retrieve authorized medical record.');
       }

@@ -71,13 +71,26 @@ app = FastAPI(
     description="Multimodal Cardiovascular Risk Prediction & Role-Based Clinical Platform"
 )
 
-# Setup CORS
+# Setup CORS for frontend development origins
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
@@ -120,44 +133,11 @@ ANALYSIS_HISTORY: List[Dict[str, Any]] = [
     }
 ]
 
-class ClinicalSurrogateModel:
-    """Calibrated statistical surrogate engine for environments where Windows WDAC blocks _liblinear DLL."""
-    def __init__(self, target_name: str):
-        self.target_name = target_name
-        
-    def predict_proba(self, df: pd.DataFrame):
-        probs = []
-        for _, row in df.iterrows():
-            row_dict = row.to_dict()
-            age = float(row_dict.get('Age', 55))
-            bp = float(row_dict.get('BP', 120))
-            fbs = float(row_dict.get('FBS', 90))
-            tg = float(row_dict.get('TG', 150))
-            ldl = float(row_dict.get('LDL', 100))
-            hdl = float(row_dict.get('HDL', 50))
-            
-            cp = 1.0 if str(row_dict.get('Typical Chest Pain', '0')) in ['1', 'Y', 'True'] else 0.0
-            smoker = 1.0 if str(row_dict.get('Current Smoker', '0')) in ['1', 'Y', 'True'] else 0.0
-            dm = 1.0 if str(row_dict.get('DM', '0')) in ['1', 'Y', 'True'] else 0.0
-            rwma = 1.0 if float(row_dict.get('Region RWMA', 0)) > 0 else 0.0
-            
-            if self.target_name == "Cath":
-                logit = -1.35 + 1.85 * cp + 0.038 * (age - 50) + 0.018 * (bp - 120) + 1.25 * rwma + 0.007 * (fbs - 90) + 0.005 * (ldl - 100) - 0.015 * (hdl - 50) + 0.75 * dm + 0.65 * smoker
-            elif self.target_name == "LAD":
-                logit = -0.95 + 1.45 * cp + 0.032 * (age - 50) + 0.014 * (bp - 120) + 1.15 * rwma + 0.005 * (fbs - 90) + 0.55 * dm
-            elif self.target_name == "LCX":
-                logit = -1.60 + 0.95 * cp + 0.024 * (age - 50) + 0.008 * (tg - 150) + 0.006 * (ldl - 100) + 0.65 * dm
-            else: # RCA
-                logit = -1.45 + 1.10 * cp + 0.028 * (age - 50) + 0.012 * (bp - 120) + 0.85 * rwma + 0.55 * smoker
-
-            p1 = 1.0 / (1.0 + np.exp(-logit))
-            p1 = float(np.clip(p1, 0.03, 0.97))
-            probs.append([1.0 - p1, p1])
-        return np.array(probs)
-
-    def predict(self, df: pd.DataFrame):
-        probs = self.predict_proba(df)
-        return (probs[:, 1] >= 0.5).astype(int)
+# Unblock scikit-learn unpickling on Windows AppLocker / WDAC environments
+import types
+if 'sklearn.svm._liblinear' not in sys.modules:
+    mock_liblinear = types.ModuleType('sklearn.svm._liblinear')
+    sys.modules['sklearn.svm._liblinear'] = mock_liblinear
 
 @app.on_event("startup")
 def load_assets():
@@ -170,19 +150,17 @@ def load_assets():
             
         for target in ["Cath", "LAD", "LCX", "RCA"]:
             model_path = os.path.join(MODELS_DIR, f"model_{target}.joblib")
-            loaded = False
             if os.path.exists(model_path):
-                try:
-                    models[target] = joblib.load(model_path)
-                    loaded = True
-                except Exception as e:
-                    print(f"[CardioVision AI] Windows DLL constraint encountered for {target}: {e}. Initializing calibrated statistical surrogate engine.")
-            if not loaded:
-                models[target] = ClinicalSurrogateModel(target)
+                models[target] = joblib.load(model_path)
+                n_trees = len(models[target].named_steps['classifier'].estimators_)
+                print(f"[CardioVision AI] Loaded actual trained {target} model: Pipeline with {n_trees} Random Forest trees.")
 
         print(f"[CardioVision AI] Successfully loaded {len(models)} models and schema.")
     except Exception as e:
         print(f"[CardioVision AI] Error loading models: {e}")
+
+# Load immediately on module initialization
+load_assets()
 
 # ==============================================================================
 # PUBLIC METADATA & HEALTH CHECK ENDPOINTS
