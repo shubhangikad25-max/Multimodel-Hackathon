@@ -1,0 +1,90 @@
+{
+  "Cath": {
+    "Accuracy": 0.8525,
+    "Precision": 0.8864,
+    "Recall": 0.907,
+    "F1": 0.8966,
+    "ROC-AUC": 0.8676,
+    "ConfusionMatrix": [
+      [
+        13,
+        5
+      ],
+      [
+        4,
+        39
+      ]
+    ],
+    "Classes": {
+      "0": "Normal",
+      "1": "CAD"
+    },
+    "Support": 61
+  },
+  "LAD": {
+    "Accuracy": 0.7869,
+    "Precision": 0.7949,
+    "Recall": 0.8611,
+    "F1": 0.8267,
+    "ROC-AUC": 0.8256,
+    "ConfusionMatrix": [
+      [
+        17,
+        8
+      ],
+      [
+        5,
+        31
+      ]
+    ],
+    "Classes": {
+      "0": "Normal",
+      "1": "Stenotic"
+    },
+    "Support": 61
+  },
+  "LCX": {
+    "Accuracy": 0.6557,
+    "Precision": 0.5652,
+    "Recall": 0.5417,
+    "F1": 0.5532,
+    "ROC-AUC": 0.7224,
+    "ConfusionMatrix": [
+      [
+        27,
+        10
+      ],
+      [
+        11,
+        13
+      ]
+    ],
+    "Classes": {
+      "0": "Normal",
+      "1": "Stenotic"
+    },
+    "Support": 61
+  },
+  "RCA": {
+    "Accuracy": 0.6721,
+    "Precision": 0.5789,
+    "Recall": 0.4783,
+    "F1": 0.5238,
+    "ROC-AUC": 0.742,
+    "ConfusionMatrix": [
+      [
+        30,
+        8
+      ],
+      [
+        12,
+        11
+      ]
+    ],
+    "Classes": {
+      "0": "Normal",
+      "1": "Stenotic"
+    },
+    "Support": 61
+  }
+}
