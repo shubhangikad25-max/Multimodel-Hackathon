@@ -71,7 +71,7 @@ app = FastAPI(
     description="Multimodal Cardiovascular Risk Prediction & Role-Based Clinical Platform"
 )
 
-# Setup CORS for frontend development origins
+# Setup CORS for development & production origins (including Vercel)
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -83,10 +83,15 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+# Allow custom production domains via comma-separated ALLOWED_ORIGINS env var
+env_origins = os.environ.get("ALLOWED_ORIGINS", "")
+if env_origins:
+    ALLOWED_ORIGINS.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
